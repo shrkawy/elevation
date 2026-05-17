@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flood Monitoring Dashboard
 
-## Getting Started
+Production-style technical assessment dashboard for Environment Agency flood
+alerts and latest river readings.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router
+- TypeScript strict mode
+- Tailwind CSS
+- TanStack Query
+- Vercel AI SDK with OpenAI
+- Recharts
+- Vitest
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Optional AI search:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+OPENAI_API_KEY=your_key_here
+```
 
-## Learn More
+If `OPENAI_API_KEY` is missing, the natural-language search input falls back to
+a deterministic parser. The dashboard remains usable without AI credentials.
 
-To learn more about Next.js, take a look at the following resources:
+## Commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm lint
+pnpm test
+pnpm build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+The app follows the local structure rule: routes compose, features orchestrate,
+components render, services fetch and transform, utilities stay generic.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/page.tsx` is intentionally thin and only renders `FloodDashboard`.
+- `components/flood-dashboard/` owns dashboard layout, local UI state, and
+  presentation.
+- `services/flood-monitoring/` owns Environment Agency API access, raw response
+  types, normalized app models, transforms, filters, sorting, chart buckets,
+  query keys, and React Query hooks.
+- `app/api/search-intent/route.ts` is the only API route. It keeps OpenAI usage
+  server-side and returns only supported dashboard search params.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Flood alerts and latest readings are called directly from the service layer
+against the public Environment Agency endpoints:
+
+- `https://environment.data.gov.uk/flood-monitoring/id/floods`
+- `https://environment.data.gov.uk/flood-monitoring/data/readings?latest`
+
+Raw API payloads are normalized and capped before they reach presentation
+components.
+
+## AI Search
+
+The command input accepts plain text or natural-language prompts such as:
+
+```txt
+show severe alerts in yorkshire
+highest station readings near thames
+```
+
+The AI route maps user text to supported URL params only:
+
+- `q`
+- `severity`
+- `region`
+- `type`
+- `sort`
+
+It does not generate flood facts, summaries, or advice.
+
+## AI Workflow
+
+AI was used to accelerate planning, architecture decomposition, API modeling,
+UI component composition, and test coverage. The implementation is constrained
+by explicit service boundaries, normalized data models, deterministic fallback
+logic, and focused tests so speed does not depend on vague generated code.
+
+## 40-Hour Improvements
+
+- Add historical station trend calls per selected station.
+- Add virtualization for very large station tables.
+- Add component tests for URL filters, tabs, and modal behavior.
+- Add MSW-backed API failure scenarios.
+- Add map-based regional context and flood-area polygons.
+- Add deployment telemetry and synthetic uptime checks.
