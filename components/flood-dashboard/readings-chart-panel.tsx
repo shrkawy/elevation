@@ -1,3 +1,4 @@
+import { getHighestRiverLevelReadings } from "@/services/flood-monitoring/flood-monitoring.helpers";
 import type { StationReading } from "@/services/flood-monitoring/flood-monitoring.types";
 import {
   Area,
@@ -27,13 +28,7 @@ export function ReadingsChartPanel({
   error: Error | null;
   onRetry: () => void;
 }) {
-  const chartReadings = readings
-    .filter(
-      (reading): reading is StationReading & { value: number } =>
-        typeof reading.value === "number",
-    )
-    .slice(0, 12)
-    .map((reading) => ({
+  const chartReadings = getHighestRiverLevelReadings(readings).map((reading) => ({
       station: reading.station,
       shortStation:
         reading.station.length > 12
@@ -133,8 +128,8 @@ export function ReadingsChartPanel({
             </AreaChart>
           </ResponsiveContainer>
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Top 12 stations by latest level reading. X shows station, Y shows
-            metres.
+            Top 12 stations ranked by highest latest river level. X shows
+            station, Y shows metres.
           </p>
         </div>
       )}

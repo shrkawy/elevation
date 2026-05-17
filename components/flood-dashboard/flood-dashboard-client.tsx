@@ -101,7 +101,7 @@ export function FloodDashboardClient() {
           <DashboardSearchCommand onApply={updateParams} />
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)]">
             <ReadingsChartPanel
-              readings={visibleReadings}
+              readings={readings}
               isLoading={readingsQuery.isLoading}
               error={readingsQuery.error}
               onRetry={() => void readingsQuery.refetch()}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   filterAlerts,
   getDashboardMetrics,
+  getHighestRiverLevelReadings,
   getReadingChartBuckets,
   normalizeFloodAlerts,
   normalizeStationReadings,
@@ -123,6 +124,60 @@ describe("flood monitoring helpers", () => {
     expect(sortReadings(readings, "highest")[0].value).toBe(4.4);
     expect(getReadingChartBuckets(readings).map((bucket) => bucket.count)).toEqual([
       1, 0, 1, 0, 1,
+    ]);
+  });
+
+  it("builds highest river level chart data from level readings only", () => {
+    const readings = normalizeStationReadings([
+      {
+        value: 2.7,
+        dateTime: "2026-05-17T10:00:00Z",
+        measure: {
+          label: "Lower Thames",
+          stationReference: "THM-1",
+          parameter: "level",
+        },
+      },
+      {
+        value: 3.1,
+        dateTime: "2026-05-17T11:00:00Z",
+        measure: {
+          label: "Lower Thames",
+          stationReference: "THM-1",
+          parameter: "level",
+        },
+      },
+      {
+        value: 9.9,
+        dateTime: "2026-05-17T09:00:00Z",
+        measure: {
+          label: "Rain Gauge Alpha",
+          stationReference: "RAIN-1",
+          parameter: "rainfall",
+        },
+      },
+      {
+        value: 2.9,
+        dateTime: "2026-05-17T08:00:00Z",
+        measure: {
+          label: "River Ouse",
+          stationReference: "OUSE-1",
+          parameter: "level",
+        },
+      },
+    ]);
+
+    expect(getHighestRiverLevelReadings(readings)).toMatchObject([
+      {
+        station: "Lower Thames",
+        stationReference: "THM-1",
+        value: 3.1,
+      },
+      {
+        station: "River Ouse",
+        stationReference: "OUSE-1",
+        value: 2.9,
+      },
     ]);
   });
 

@@ -158,6 +158,58 @@ export function getReadingChartBuckets(
   });
 }
 
+export function getHighestRiverLevelReadings(
+  readings: StationReading[],
+  limit = 12
+): StationReading[] {
+  const highestByStation = new Map<string, StationReading & { value: number }>();
+
+  for (const reading of readings) {
+    if (typeof reading.value !== "number") {
+      continue;
+    }
+
+    if (normalizeSearch(reading.parameter) !== "level") {
+      continue;
+    }
+
+    const stationKey = normalizeSearch(reading.stationReference || reading.station);
+    const current = highestByStation.get(stationKey);
+
+    if (!current) {
+      highestByStation.set(stationKey, reading as StationReading & { value: number });
+      continue;
+    }
+
+    const currentTime = dateValue(current.dateTime);
+    const nextTime = dateValue(reading.dateTime);
+
+    if (reading.value > current.value) {
+      highestByStation.set(stationKey, reading as StationReading & { value: number });
+      continue;
+    }
+
+    if (reading.value === current.value && nextTime > currentTime) {
+      highestByStation.set(stationKey, reading as StationReading & { value: number });
+    }
+  }
+
+  return Array.from(highestByStation.values())
+    .toSorted((a, b) => {
+      if (b.value !== a.value) {
+        return b.value - a.value;
+      }
+
+      const timestampDiff = dateValue(b.dateTime) - dateValue(a.dateTime);
+      if (timestampDiff !== 0) {
+        return timestampDiff;
+      }
+
+      return a.station.localeCompare(b.station);
+    })
+    .slice(0, limit);
+}
+
 export function filterAlerts(
   alerts: FloodAlert[],
   params: DashboardSearchParams
