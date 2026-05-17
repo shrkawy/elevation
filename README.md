@@ -5,11 +5,11 @@ alerts and latest river readings.
 
 ## Stack
 
-- Next.js App Router
+- Next.js App Router with React Compiler
 - TypeScript strict mode
 - Tailwind CSS
 - TanStack Query
-- Vercel AI SDK with OpenAI
+- Vercel AI SDK with Google Gemini
 - Recharts
 - Vitest
 
@@ -25,10 +25,10 @@ Open `http://localhost:3000`.
 Optional AI search:
 
 ```bash
-OPENAI_API_KEY=your_key_here
+GOOGLE_GENERATIVE_AI_API_KEY=your_key_here
 ```
 
-If `OPENAI_API_KEY` is missing, the natural-language search input falls back to
+If `GOOGLE_GENERATIVE_AI_API_KEY` is missing, the natural-language search input falls back to
 a deterministic parser. The dashboard remains usable without AI credentials.
 
 ## Commands
@@ -50,7 +50,7 @@ components render, services fetch and transform, utilities stay generic.
 - `services/flood-monitoring/` owns Environment Agency API access, raw response
   types, normalized app models, transforms, filters, sorting, chart buckets,
   query keys, and React Query hooks.
-- `app/api/search-intent/route.ts` is the only API route. It keeps OpenAI usage
+- `app/api/search-intent/route.ts` is the only API route. It keeps Google Gemini usage
   server-side and returns only supported dashboard search params.
 
 Flood alerts and latest readings are called directly from the service layer
@@ -80,6 +80,13 @@ The AI route maps user text to supported URL params only:
 - `sort`
 
 It does not generate flood facts, summaries, or advice.
+
+## React Compiler
+
+The project runs the React Compiler (`reactCompiler: true` in `next.config.ts`),
+which automatically inserts memoization at the component and value level.
+Manual `useMemo` and `useCallback` calls are therefore unnecessary and are
+not used throughout the codebase.
 
 ## AI Workflow
 
