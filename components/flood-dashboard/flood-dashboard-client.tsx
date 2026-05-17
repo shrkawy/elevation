@@ -1,25 +1,26 @@
 "use client";
 
 import {
-    applySearchParams,
-    filterAlerts,
-    filterReadings,
-    getDashboardMetrics,
-    parseDashboardSearchParams,
-    sortAlerts,
-    sortReadings,
+  applySearchParams,
+  filterAlerts,
+  filterReadings,
+  getDashboardMetrics,
+  parseDashboardSearchParams,
+  sortAlerts,
+  sortReadings,
 } from "@/services/flood-monitoring/flood-monitoring.helpers";
 import {
-    useFloodAlertsQuery,
-    useLatestReadingsQuery,
+  useFloodAlertsQuery,
+  useLatestReadingsQuery,
 } from "@/services/flood-monitoring/flood-monitoring.queries";
 import type {
-    DashboardSearchParams,
-    DetailItem,
-    FloodAlert,
-    StationReading,
+  DashboardSearchParams,
+  DetailItem,
+  FloodAlert,
+  StationReading,
 } from "@/services/flood-monitoring/flood-monitoring.types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardMetrics } from "./dashboard-metrics";
 import { DashboardSearchCommand } from "./dashboard-search-command";
@@ -27,7 +28,6 @@ import { DashboardSidebar } from "./dashboard-sidebar";
 import { DetailModal } from "./detail-modal";
 import { LiveDataPanel, type LiveTab } from "./live-data-panel";
 import { ReadingsChartPanel } from "./readings-chart-panel";
-import { useCallback, useMemo, useState } from "react";
 
 const EMPTY_ALERTS: FloodAlert[] = [];
 const EMPTY_READINGS: StationReading[] = [];
@@ -101,7 +101,7 @@ export function FloodDashboardClient() {
           <DashboardSearchCommand onApply={updateParams} />
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)]">
             <ReadingsChartPanel
-              buckets={readingsQuery.data?.buckets ?? []}
+              readings={visibleReadings}
               isLoading={readingsQuery.isLoading}
               error={readingsQuery.error}
               onRetry={() => void readingsQuery.refetch()}
