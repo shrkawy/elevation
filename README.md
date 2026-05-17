@@ -100,6 +100,8 @@ logic, and focused tests so speed does not depend on vague generated code.
 - Add historical station trend calls per selected station.
 - Add virtualization for very large station tables.
 - Add component tests for URL filters, tabs, and modal behavior.
-- Add MSW-backed API failure scenarios.
+- Move public EA fetches behind thin Next route handlers with conservative
+  30-60 second caching, stale/degraded freshness indicators, and server-side
+  latency/error logging.
 - Add map-based regional context and flood-area polygons.
 - Add deployment telemetry and synthetic uptime checks.
