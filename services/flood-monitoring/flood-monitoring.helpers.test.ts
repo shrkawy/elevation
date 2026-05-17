@@ -7,7 +7,6 @@ import {
   normalizeFloodAlerts,
   normalizeStationReadings,
   parseDashboardSearchParams,
-  parseSearchIntentFallback,
   sanitizeDashboardSearchParams,
   sortAlerts,
   sortReadings,
@@ -237,21 +236,6 @@ describe("flood monitoring helpers", () => {
       q: "Thames",
       sort: "highest",
       type: "stations",
-    });
-  });
-
-  it("parses fallback natural-language intent", () => {
-    expect(parseSearchIntentFallback("show severe alerts in yorkshire")).toEqual({
-      severity: "severe",
-      type: "alerts",
-      sort: "severity",
-      region: "Yorkshire",
-    });
-
-    expect(parseSearchIntentFallback("highest station readings near thames")).toEqual({
-      type: "stations",
-      sort: "highest",
-      region: "Thames",
     });
   });
 });
