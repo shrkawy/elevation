@@ -5,7 +5,6 @@ import {
   type EaFloodItem,
   type EaReadingItem,
   type FloodAlert,
-  type ReadingChartBucket,
   type StationReading,
   dashboardSearchParamsSchema,
 } from "./flood-monitoring.types";
@@ -42,7 +41,7 @@ export function normalizeFloodAlerts(items: EaFloodItem[] = []): FloodAlert[] {
       isTidal: Boolean(item.isTidal),
       raisedAt: item.timeRaised ?? null,
       changedAt: item.timeMessageChanged ?? item.timeSeverityChanged ?? null,
-      sourceUrl: sourceId,
+      sourceUrl: safeSourceUrl(sourceId),
     };
   });
 }
@@ -88,9 +87,15 @@ export function normalizeStationReadings(
       value,
       valueLabel: value === null ? "No reading" : value.toFixed(2),
       dateTime: item.dateTime ?? null,
-      sourceUrl: sourceId,
+      sourceUrl: safeSourceUrl(sourceId),
     };
   });
+}
+
+const EA_ORIGIN = "https://environment.data.gov.uk";
+
+function safeSourceUrl(url: string): string {
+  return url.startsWith(EA_ORIGIN) ? url : "";
 }
 
 export function getRegions(alerts: FloodAlert[]): string[] {
@@ -129,34 +134,7 @@ export function getDashboardMetrics(
   };
 }
 
-export function getReadingChartBuckets(
-  readings: StationReading[]
-): ReadingChartBucket[] {
-  const buckets = [
-    { label: "< 0.5m", min: Number.NEGATIVE_INFINITY, max: 0.5 },
-    { label: "0.5-1m", min: 0.5, max: 1 },
-    { label: "1-2m", min: 1, max: 2 },
-    { label: "2-3m", min: 2, max: 3 },
-    { label: "3m+", min: 3, max: Number.POSITIVE_INFINITY },
-  ];
 
-  return buckets.map((bucket) => {
-    const values = readings
-      .map((reading) => reading.value)
-      .filter(
-        (value): value is number =>
-          typeof value === "number" && value >= bucket.min && value < bucket.max
-      );
-
-    return {
-      label: bucket.label,
-      count: values.length,
-      average: values.length
-        ? roundTo(values.reduce((total, value) => total + value, 0) / values.length, 2)
-        : 0,
-    };
-  });
-}
 
 export function getHighestRiverLevelReadings(
   readings: StationReading[],

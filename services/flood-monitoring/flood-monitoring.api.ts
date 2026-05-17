@@ -1,6 +1,5 @@
 import { fetchJson } from "@/services/api";
 import {
-  getReadingChartBuckets,
   getRegions,
   normalizeFloodAlerts,
   normalizeStationReadings,
@@ -38,7 +37,6 @@ export async function fetchLatestReadings(): Promise<ReadingsDataset> {
 
   return {
     readings,
-    buckets: getReadingChartBuckets(readings),
     updatedAt:
       readings
         .map((reading) => reading.dateTime)

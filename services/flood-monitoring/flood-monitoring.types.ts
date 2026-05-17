@@ -109,12 +109,6 @@ export type DashboardMetrics = {
   updatedAt: string | null;
 };
 
-export type ReadingChartBucket = {
-  label: string;
-  count: number;
-  average: number;
-};
-
 export type FloodsDataset = {
   alerts: FloodAlert[];
   regions: string[];
@@ -123,7 +117,6 @@ export type FloodsDataset = {
 
 export type ReadingsDataset = {
   readings: StationReading[];
-  buckets: ReadingChartBucket[];
   updatedAt: string | null;
 };
 

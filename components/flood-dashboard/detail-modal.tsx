@@ -63,7 +63,7 @@ export function DetailModal({
                       {detail.item.message}
                     </p>
                   </div>
-                  <SourceLink href={detail.item.sourceUrl} />
+                  {detail.item.sourceUrl && <SourceLink href={detail.item.sourceUrl} />}
                 </>
               ) : (
                 <>
@@ -82,7 +82,7 @@ export function DetailModal({
                       ["Reading time", formatDateTime(detail.item.dateTime)],
                     ]}
                   />
-                  <SourceLink href={detail.item.sourceUrl} />
+                  {detail.item.sourceUrl && <SourceLink href={detail.item.sourceUrl} />}
                 </>
               )}
             </div>

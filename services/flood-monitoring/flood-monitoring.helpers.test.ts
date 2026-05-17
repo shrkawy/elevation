@@ -3,7 +3,6 @@ import {
   filterAlerts,
   getDashboardMetrics,
   getHighestRiverLevelReadings,
-  getReadingChartBuckets,
   normalizeFloodAlerts,
   normalizeStationReadings,
   parseDashboardSearchParams,
@@ -113,7 +112,7 @@ describe("flood monitoring helpers", () => {
     expect(sortAlerts(alerts, "severity")[0].severity).toBe("severe");
   });
 
-  it("sorts readings by highest value and builds chart buckets", () => {
+  it("sorts readings by highest value", () => {
     const readings = normalizeStationReadings([
       { value: 0.2 },
       { value: 1.2 },
@@ -121,9 +120,6 @@ describe("flood monitoring helpers", () => {
     ]);
 
     expect(sortReadings(readings, "highest")[0].value).toBe(4.4);
-    expect(getReadingChartBuckets(readings).map((bucket) => bucket.count)).toEqual([
-      1, 0, 1, 0, 1,
-    ]);
   });
 
   it("builds highest river level chart data from level readings only", () => {
