@@ -1,20 +1,25 @@
-import { fetchJson } from "@/services/api";
+import { ApiError, fetchJson } from "@/services/api";
+import type { ZodType } from "zod";
 import {
   getRegions,
   normalizeFloodAlerts,
   normalizeStationReadings,
 } from "./flood-monitoring.helpers";
-import type {
-  EaFloodsResponse,
-  EaReadingsResponse,
-  FloodsDataset,
-  ReadingsDataset,
+import {
+  eaFloodsResponseSchema,
+  eaReadingsResponseSchema,
+  type FloodsDataset,
+  type ReadingsDataset,
 } from "./flood-monitoring.types";
 
 const API_ROOT = "https://environment.data.gov.uk/flood-monitoring";
 
 export async function fetchFloodAlerts(): Promise<FloodsDataset> {
-  const response = await fetchJson<EaFloodsResponse>(`${API_ROOT}/id/floods`);
+  const response = parseEaResponse(
+    eaFloodsResponseSchema,
+    await fetchJson<unknown>(`${API_ROOT}/id/floods`),
+    "flood alerts"
+  );
   const alerts = normalizeFloodAlerts(response.items);
 
   return {
@@ -30,8 +35,10 @@ export async function fetchFloodAlerts(): Promise<FloodsDataset> {
 }
 
 export async function fetchLatestReadings(): Promise<ReadingsDataset> {
-  const response = await fetchJson<EaReadingsResponse>(
-    `${API_ROOT}/data/readings?latest`
+  const response = parseEaResponse(
+    eaReadingsResponseSchema,
+    await fetchJson<unknown>(`${API_ROOT}/data/readings?latest`),
+    "latest readings"
   );
   const readings = normalizeStationReadings(response.items);
 
@@ -44,4 +51,18 @@ export async function fetchLatestReadings(): Promise<ReadingsDataset> {
         .sort()
         .at(-1) ?? null,
   };
+}
+
+function parseEaResponse<T>(
+  schema: ZodType<T>,
+  value: unknown,
+  label: string
+): T {
+  const result = schema.safeParse(value);
+
+  if (!result.success) {
+    throw new ApiError(`Invalid ${label} response from Environment Agency`);
+  }
+
+  return result.data;
 }

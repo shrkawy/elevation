@@ -9,8 +9,8 @@ import {
   dashboardSearchParamsSchema,
 } from "./flood-monitoring.types";
 
-const MAX_ALERTS = 250;
-const MAX_READINGS = 600;
+export const MAX_VISIBLE_ALERTS = 250;
+export const MAX_VISIBLE_READINGS = 600;
 const EMPTY_VALUES = new Set(["", "unknown", "undefined", "null"]);
 const SEVERITY_RANK: Record<AlertSeverity, number> = {
   severe: 4,
@@ -20,7 +20,7 @@ const SEVERITY_RANK: Record<AlertSeverity, number> = {
 };
 
 export function normalizeFloodAlerts(items: EaFloodItem[] = []): FloodAlert[] {
-  return items.slice(0, MAX_ALERTS).map((item, index) => {
+  return items.map((item, index) => {
     const sourceId = cleanString(item["@id"]) || `flood-alert-${index}`;
     const severity = normalizeSeverity(item.severity, item.severityLevel);
 
@@ -49,7 +49,7 @@ export function normalizeFloodAlerts(items: EaFloodItem[] = []): FloodAlert[] {
 export function normalizeStationReadings(
   items: EaReadingItem[] = []
 ): StationReading[] {
-  return items.slice(0, MAX_READINGS).map((item, index) => {
+  return items.map((item, index) => {
     const measure =
       typeof item.measure === "object" && item.measure ? item.measure : null;
     const measureId =
@@ -133,8 +133,6 @@ export function getDashboardMetrics(
     updatedAt: latestTimes.sort().at(-1) ?? null,
   };
 }
-
-
 
 export function getHighestRiverLevelReadings(
   readings: StationReading[],
@@ -265,6 +263,20 @@ export function sortReadings(
 
     return dateValue(b.dateTime) - dateValue(a.dateTime);
   });
+}
+
+export function limitDashboardAlerts(
+  alerts: FloodAlert[],
+  limit = MAX_VISIBLE_ALERTS
+): FloodAlert[] {
+  return alerts.slice(0, limit);
+}
+
+export function limitDashboardReadings(
+  readings: StationReading[],
+  limit = MAX_VISIBLE_READINGS
+): StationReading[] {
+  return readings.slice(0, limit);
 }
 
 export function parseDashboardSearchParams(
@@ -506,12 +518,4 @@ function inferMeasureUnit(measureId: string): string {
   const parts = slug.split("-");
 
   return parts.at(-1) || "m";
-}
-
-function titleCase(value: string): string {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 }

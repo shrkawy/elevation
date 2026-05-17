@@ -40,7 +40,7 @@ export function ReadingsChartPanel({
     }));
 
   return (
-    <Panel className="min-h-90 overflow-hidden">
+    <Panel className="min-h-[22.5rem] overflow-hidden">
       <PanelHeader
         label="latest readings snapshot"
         title="Highest river levels"

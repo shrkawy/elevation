@@ -5,10 +5,10 @@ import { useEffect } from "react";
 
 export default function Error({
   error,
-  reset,
+  unstable_retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  unstable_retry: () => void;
 }) {
   useEffect(() => {
     console.error(error);
@@ -21,10 +21,12 @@ export default function Error({
           Something went wrong
         </h1>
         <p className="text-sm text-muted-foreground">
-          {error.digest ? `Error ID: ${error.digest}` : "An unexpected error occurred while loading the dashboard."}
+          {error.digest
+            ? `Error ID: ${error.digest}`
+            : "An unexpected error occurred while loading the dashboard."}
         </p>
       </div>
-      <Button onClick={reset} variant="outline">
+      <Button onClick={unstable_retry} variant="outline">
         Try again
       </Button>
     </div>

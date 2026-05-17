@@ -34,7 +34,7 @@ export function AlertsTable({
   }
 
   return (
-    <div className="max-h-102.5 overflow-auto">
+    <div className="max-h-[25.625rem] overflow-auto">
       {alerts.map((alert) => (
         <button
           key={alert.id}

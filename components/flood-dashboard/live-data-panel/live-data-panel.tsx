@@ -36,7 +36,7 @@ export function LiveDataPanel({
   const isAlerts = activeTab === "alerts";
 
   return (
-    <Panel className="min-h-90 overflow-hidden">
+    <Panel className="min-h-[22.5rem] overflow-hidden">
       <PanelHeader
         label="live table"
         title={isAlerts ? "Flood alerts" : "Monitoring stations"}

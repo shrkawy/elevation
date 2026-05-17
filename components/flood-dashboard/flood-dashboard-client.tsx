@@ -5,6 +5,8 @@ import {
   filterAlerts,
   filterReadings,
   getDashboardMetrics,
+  limitDashboardAlerts,
+  limitDashboardReadings,
   parseDashboardSearchParams,
   sortAlerts,
   sortReadings,
@@ -20,7 +22,7 @@ import type {
   StationReading,
 } from "@/services/flood-monitoring/flood-monitoring.types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardMetrics } from "./dashboard-metrics";
 import { DashboardSearchCommand } from "./dashboard-search-command";
@@ -38,10 +40,7 @@ export function FloodDashboardClient() {
   const searchParams = useSearchParams();
   const [detail, setDetail] = useState<DetailItem | null>(null);
 
-  const params = useMemo(
-    () => parseDashboardSearchParams(searchParams),
-    [searchParams]
-  );
+  const params = parseDashboardSearchParams(searchParams);
 
   const floodsQuery = useFloodAlertsQuery();
   const readingsQuery = useLatestReadingsQuery();
@@ -49,38 +48,30 @@ export function FloodDashboardClient() {
   const readings = readingsQuery.data?.readings ?? EMPTY_READINGS;
   const displayedTab: LiveTab = params.type === "stations" ? "stations" : "alerts";
 
-  const visibleAlerts = useMemo(
-    () => sortAlerts(filterAlerts(alerts, params), params.sort),
-    [alerts, params]
+  const visibleAlerts = limitDashboardAlerts(
+    sortAlerts(filterAlerts(alerts, params), params.sort)
   );
-  const visibleReadings = useMemo(
-    () => sortReadings(filterReadings(readings, params), params.sort),
-    [params, readings]
+  const visibleReadings = limitDashboardReadings(
+    sortReadings(filterReadings(readings, params), params.sort)
   );
-  const metrics = useMemo(
-    () => getDashboardMetrics(alerts, readings),
-    [alerts, readings]
-  );
+  const metrics = getDashboardMetrics(alerts, readings);
 
   const isInitialLoading = floodsQuery.isLoading || readingsQuery.isLoading;
   const isRefreshing = floodsQuery.isFetching || readingsQuery.isFetching;
   const hasError = Boolean(floodsQuery.error || readingsQuery.error);
 
-  const updateParams = useCallback(
-    (next: DashboardSearchParams) => {
-      const updated = applySearchParams(new URLSearchParams(searchParams), next);
-      const query = updated.toString();
+  function updateParams(next: DashboardSearchParams) {
+    const updated = applySearchParams(new URLSearchParams(searchParams), next);
+    const query = updated.toString();
 
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
-      });
-    },
-    [pathname, router, searchParams]
-  );
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  }
 
-  const handleRefresh = useCallback(() => {
+  function handleRefresh() {
     void Promise.all([floodsQuery.refetch(), readingsQuery.refetch()]);
-  }, [floodsQuery, readingsQuery]);
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

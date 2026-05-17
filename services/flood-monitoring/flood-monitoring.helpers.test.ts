@@ -3,6 +3,7 @@ import {
   filterAlerts,
   getDashboardMetrics,
   getHighestRiverLevelReadings,
+  limitDashboardAlerts,
   normalizeFloodAlerts,
   normalizeStationReadings,
   parseDashboardSearchParams,
@@ -10,6 +11,10 @@ import {
   sortAlerts,
   sortReadings,
 } from "./flood-monitoring.helpers";
+import {
+  eaFloodsResponseSchema,
+  eaReadingsResponseSchema,
+} from "./flood-monitoring.types";
 
 describe("flood monitoring helpers", () => {
   it("normalizes flood alerts into app models", () => {
@@ -37,6 +42,18 @@ describe("flood monitoring helpers", () => {
       riverOrSea: "River Thames",
       severity: "warning",
     });
+  });
+
+  it("normalizes full datasets and caps display results separately", () => {
+    const alerts = normalizeFloodAlerts(
+      Array.from({ length: 251 }, (_, index) => ({
+        "@id": `https://environment.data.gov.uk/flood-monitoring/id/floods/${index}`,
+        description: `Area ${index}`,
+      }))
+    );
+
+    expect(alerts).toHaveLength(251);
+    expect(limitDashboardAlerts(alerts)).toHaveLength(250);
   });
 
   it("normalizes station readings and ignores non-numeric values", () => {
@@ -192,6 +209,25 @@ describe("flood monitoring helpers", () => {
     });
 
     expect(sanitizeDashboardSearchParams({ severity: "extreme" })).toEqual({});
+  });
+
+  it("validates Environment Agency response envelopes", () => {
+    expect(
+      eaFloodsResponseSchema.safeParse({
+        items: [
+          {
+            "@id":
+              "https://environment.data.gov.uk/flood-monitoring/id/floods/1",
+          },
+        ],
+      }).success
+    ).toBe(true);
+
+    expect(
+      eaReadingsResponseSchema.safeParse({
+        items: [{ value: "not-a-number", measure: { period: "15" } }],
+      }).success
+    ).toBe(false);
   });
 
   it("parses flood warning endpoint params into dashboard filters", () => {

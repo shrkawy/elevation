@@ -18,56 +18,66 @@ export type DashboardSearchParams = z.infer<
   typeof dashboardSearchParamsSchema
 >;
 
-export type EaFloodsResponse = {
-  items?: EaFloodItem[];
-};
+const optionalString = z.string().optional();
 
-export type EaFloodItem = {
-  "@id"?: string;
-  description?: string;
-  eaAreaName?: string;
-  eaRegionName?: string;
-  floodAreaID?: string;
-  isTidal?: boolean;
-  message?: string;
-  severity?: string;
-  severityLevel?: number;
-  timeMessageChanged?: string;
-  timeRaised?: string;
-  timeSeverityChanged?: string;
-  floodArea?: {
-    "@id"?: string;
-    county?: string;
-    notation?: string;
-    polygon?: string;
-    riverOrSea?: string;
-  };
-};
+export const eaFloodItemSchema = z.object({
+  "@id": optionalString,
+  description: optionalString,
+  eaAreaName: optionalString,
+  eaRegionName: optionalString,
+  floodAreaID: optionalString,
+  isTidal: z.boolean().optional(),
+  message: optionalString,
+  severity: optionalString,
+  severityLevel: z.number().optional(),
+  timeMessageChanged: optionalString,
+  timeRaised: optionalString,
+  timeSeverityChanged: optionalString,
+  floodArea: z
+    .object({
+      "@id": optionalString,
+      county: optionalString,
+      notation: optionalString,
+      polygon: optionalString,
+      riverOrSea: optionalString,
+    })
+    .optional(),
+});
 
-export type EaReadingsResponse = {
-  items?: EaReadingItem[];
-};
+export const eaFloodsResponseSchema = z.object({
+  items: z.array(eaFloodItemSchema).optional(),
+});
 
-export type EaReadingItem = {
-  "@id"?: string;
-  dateTime?: string;
-  value?: number | string | null;
-  measure?:
-    | string
-    | {
-        "@id"?: string;
-        label?: string;
-        notation?: string;
-        parameter?: string;
-        parameterName?: string;
-        period?: number;
-        qualifier?: string;
-        station?: string;
-        stationReference?: string;
-        unit?: string;
-        unitName?: string;
-      };
-};
+export type EaFloodItem = z.infer<typeof eaFloodItemSchema>;
+export type EaFloodsResponse = z.infer<typeof eaFloodsResponseSchema>;
+
+export const eaReadingMeasureSchema = z.object({
+  "@id": optionalString,
+  label: optionalString,
+  notation: optionalString,
+  parameter: optionalString,
+  parameterName: optionalString,
+  period: z.number().optional(),
+  qualifier: optionalString,
+  station: optionalString,
+  stationReference: optionalString,
+  unit: optionalString,
+  unitName: optionalString,
+});
+
+export const eaReadingItemSchema = z.object({
+  "@id": optionalString,
+  dateTime: optionalString,
+  value: z.union([z.number(), z.string(), z.null()]).optional(),
+  measure: z.union([z.string(), eaReadingMeasureSchema]).optional(),
+});
+
+export const eaReadingsResponseSchema = z.object({
+  items: z.array(eaReadingItemSchema).optional(),
+});
+
+export type EaReadingItem = z.infer<typeof eaReadingItemSchema>;
+export type EaReadingsResponse = z.infer<typeof eaReadingsResponseSchema>;
 
 export type FloodAlert = {
   id: string;
